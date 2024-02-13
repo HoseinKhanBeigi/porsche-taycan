@@ -1,63 +1,42 @@
-import React, { useRef, useEffect } from "react";
-import * as PIXI from "pixi.js";
-import imageUrl from "./assets/bunny.png";
+import React, { useEffect, useRef } from "react";
+import { gsap } from "gsap";
 
-const PixiComponent = () => {
-  const pixiContainer = useRef(null);
-  const sprite = useRef(null);
-  const app = useRef(null);
-  const start = useRef(null);
+const SvgRotatingLine = () => {
+  const lineRef = useRef(null);
 
   useEffect(() => {
-    app.current = new PIXI.Application({
-      background: "#1099bb",
-      resizeTo: window,
-      view: pixiContainer.current,
+    const line = lineRef.current;
+
+    gsap.to(line, {
+      duration: 4, // Duration of the rotation animation
+      rotation: 360, // Rotate the line by 360 degrees
+      transformOrigin: "100% 50%", // Set the transform origin to the center of the line
+      repeat: -1, // Repeat the animation indefinitely
+      ease: "none", // Linear easing
     });
-
-    const texture = PIXI.Texture.from(imageUrl);
-
-    sprite.current = new PIXI.Sprite(texture);
-    // sprite.current.anchor.set(1);
-    sprite.current.x = app.current.renderer.width / 2;
-    sprite.current.y = app.current.renderer.height / 2;
-    sprite.current.alpha = 0; // Start with transparency
-    app.current.stage.addChild(sprite.current);
-
-    start.current = performance.now();
-
-    // Start the custom animation loop
-    animate();
   }, []);
 
-  const animate = () => {
-    const elapsed = performance.now() - start.current;
-
-    // Fade-in animation
-    const fadeInDuration = 1000; // Animation duration in milliseconds
-    const targetAlpha = 1; // Target alpha value
-    let alpha = Math.min(elapsed / fadeInDuration, 1);
-    sprite.current.alpha = alpha * targetAlpha;
-
-    // Fade-out animation after 3 seconds
-    // if (elapsed > 3000) {
-    //   const fadeOutDuration = 2000; // Animation duration in milliseconds
-    //   alpha = Math.max(1 - (elapsed - 3000) / fadeOutDuration, 0);
-    //   sprite.current.alpha = alpha * targetAlpha;
-    // }
-
-    // Continue the animation loop
-    if (elapsed < 1000) {
-      // Total animation duration of 5 seconds
-      requestAnimationFrame(animate);
-    }
-  };
-
   return (
-    <>
-      <canvas ref={pixiContainer} />
-    </>
+    <svg width="200" height="200" viewBox="0 0 200 200">
+      <circle
+        cx="100"
+        cy="100"
+        r="80"
+        fill="none"
+        stroke="blue"
+        strokeWidth="5"
+      />
+      <line
+        ref={lineRef}
+        x1="0"
+        y1="100"
+        x2="100"
+        y2="100"
+        stroke="red"
+        strokeWidth="3"
+      />
+    </svg>
   );
 };
 
-export default PixiComponent;
+export default SvgRotatingLine;
