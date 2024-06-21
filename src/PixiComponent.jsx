@@ -1,70 +1,62 @@
+// src/CircleAnimation.js
 import React, { useEffect, useRef } from "react";
+import * as PIXI from "pixi.js";
 import { gsap } from "gsap";
 
-const SvgRotatingLine = () => {
-  const lineRef = useRef(null);
+const CircleAnimation = () => {
+  const pixiContainer = useRef(null);
 
   useEffect(() => {
-    const line = lineRef.current;
-
-    gsap.to(line, {
-      duration: 4, // Duration of the rotation animation
-      rotation: 360, // Rotate the line by 360 degrees
-      transformOrigin: "100% 100%", // Set the transform origin to the center of the line
-      repeat: 2, // Repeat the animation indefinitely
-      ease: "none", // Linear easing
+    const app = new PIXI.Application({
+      width: 800,
+      height: 600,
+      backgroundColor: 0x1099bb,
     });
+    pixiContainer.current.appendChild(app.view);
+
+    const centerX = app.view.width / 2;
+    const centerY = app.view.height / 2;
+    const radius = 100;
+
+    // Draw circle
+    const circle = new PIXI.Graphics();
+    circle.lineStyle(2, 0xffffff);
+    circle.drawCircle(centerX, centerY, radius);
+    app.stage.addChild(circle);
+
+    // Draw line
+    const line = new PIXI.Graphics();
+    line.lineStyle(2, 0xff0000);
+    line.moveTo(centerX + radius, centerY);
+    line.lineTo(centerX + radius + 50, centerY); // Extend the line outward
+    app.stage.addChild(line);
+
+    // Animate line along the circumference of the circle
+    gsap.to(line, {
+      duration: 5,
+      repeat: -1,
+      ease: "none",
+      onUpdate: function () {
+        const progress = gsap.getProperty(this, "progress");
+        const angle = progress * Math.PI * 2;
+        const x1 = centerX + radius * Math.cos(angle);
+        const y1 = centerY + radius * Math.sin(angle);
+        const x2 = centerX + (radius + 50) * Math.cos(angle);
+        const y2 = centerY + (radius + 50) * Math.sin(angle);
+
+        line.clear();
+        line.lineStyle(2, 0xff0000);
+        line.moveTo(x1, y1);
+        line.lineTo(x2, y2);
+      },
+    });
+
+    return () => {
+      app.destroy(true, true);
+    };
   }, []);
 
-  return (
-    <div style={{ background: "black" }}>
-      <svg width="773" height="531" viewBox="0 0 773 531" fill="none">
-        <line
-          ref={lineRef}
-          x1="386"
-          y1="200"
-          x2="386"
-          y2="266"
-          stroke="gray"
-          strokeWidth="3"
-        />
-        <path
-          d="M500.698 379.698L483.098 362.098M272.302 379.698L289.902 362.098"
-          stroke="#5b5b5b"
-          strokeWidth="4"
-        />
-        <path
-          d="M542.497 307.299C548.909 283.371 549.73 258.289 544.897 233.993C540.064 209.697 529.707 186.838 514.627 167.185C499.546 147.532 480.147 131.611 457.93 120.655C435.712 109.699 411.272 104 386.5 104L386.5 115.84C409.456 115.84 432.104 121.121 452.693 131.274C473.281 141.427 491.258 156.181 505.233 174.393C519.208 192.605 528.806 213.788 533.284 236.303C537.763 258.818 537.002 282.061 531.06 304.235L542.497 307.299Z"
-          fill="#101010"
-        />
-        {/* <path
-          d="M542.497 223.701C533.296 189.36 513.02 159.016 484.815 137.373C456.61 115.731 422.052 104 386.5 104L386.5 115.84C419.445 115.84 451.47 126.711 477.607 146.767C503.744 166.823 522.533 194.943 531.06 226.765L542.497 223.701Z"
-          fill="gray"
-        /> */}
-        <path
-          d="M386.5 104C365.292 104 344.291 108.177 324.697 116.293C305.103 124.41 287.299 136.306 272.302 151.302C257.306 166.299 245.41 184.103 237.293 203.697C229.177 223.291 225 244.292 225 265.5L236.84 265.5C236.84 245.846 240.711 226.385 248.232 208.228C255.754 190.07 266.777 173.572 280.675 159.675C294.572 145.777 311.07 134.754 329.228 127.232C347.385 119.711 366.846 115.84 386.5 115.84L386.5 104Z"
-          fill="#101010"
-        />
-        {/* <path
-          d="M386.5 104C358.151 104 330.301 111.462 305.75 125.637C281.199 139.811 260.811 160.199 246.637 184.75L256.891 190.67C270.026 167.919 288.919 149.026 311.67 135.891C334.421 122.756 360.229 115.84 386.5 115.84L386.5 104Z"
-          fill="gray"
-        /> */}
-        <path
-          d="M273.716 378.284C251.41 355.977 236.219 327.557 230.065 296.617C223.91 265.677 227.069 233.607 239.141 204.462C251.213 175.317 271.657 150.407 297.887 132.881C324.116 115.355 354.954 106 386.5 106C418.046 106 448.884 115.355 475.113 132.881C501.343 150.407 521.787 175.317 533.859 204.462C545.931 233.607 549.09 265.677 542.935 296.617C536.781 327.557 521.59 355.977 499.284 378.284"
-          stroke="#5b5b5b"
-          strokeWidth="4"
-        />
-        <path
-          d="M466.25 403.631C442.003 417.63 414.498 425 386.5 425C358.502 425 330.997 417.63 306.75 403.631"
-          stroke="gray"
-          strokeWidth="4"
-        />
-        <circle cx="386" cy="266" r="81" stroke="#101010" strokeWidth="28" />
-        <circle cx="386" cy="266" r="66.5" stroke="#5b5b5b" strokeWidth="3" />
-      </svg>
-      <svg width="200" height="200" viewBox="0 0 200 200"></svg>
-    </div>
-  );
+  return <div ref={pixiContainer}></div>;
 };
 
-export default SvgRotatingLine;
+export default CircleAnimation;
